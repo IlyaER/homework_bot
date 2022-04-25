@@ -36,7 +36,7 @@ def send_message(bot, message):
     logging.info(f"Отправка сообщения в Telegram: {message}")
     try:
         bot.send_message(
-            chat_id='fake',
+            chat_id=TELEGRAM_CHAT_ID,
             text=message,
         )
     except TelegramError as error:
@@ -80,10 +80,6 @@ def check_response(response):
     if not response.get('homeworks'):
         return []
     logging.debug(f"Ответ API корректен: {response}")
-    try:
-        response.get('homeworks')
-    except Exception as error:
-        logging.exception(f"Страница выдаёт ошибку: {error}")
     return response.get('homeworks')
 
 
@@ -130,6 +126,7 @@ def main():
                 if not hw_status:
                     raise ValueError('Список работ пуст')
                 logging.debug('Новых статусов не появилось')
+                hw_status = ''
                 continue
             hw = check[0]
             message = parse_status(hw)
@@ -137,7 +134,7 @@ def main():
                 send_message(bot, message)
                 hw_status = message
             else:
-                logging.error(f'отсутствует ключ homeworks в ответе: {check}')
+                logging.error(f'Ответ уже был отправлен: {message}')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logging.exception(message)
